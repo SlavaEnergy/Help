@@ -14,7 +14,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
+      overflow: auto; /* Changed from hidden to allow scrolling */
     }
     #mainScreen {
       display: flex;
@@ -121,7 +121,7 @@
       position: relative;
     }
     #solutionCanvas {
-      background: transparent;
+      background: #1c1c1c; /* Добавлен цвет фона для отладки */
       display: block;
     }
   </style>
@@ -175,7 +175,7 @@
     const toBase = document.getElementById('toBase');
     const convertBtn = document.getElementById('convertBtn');
     const canvas = document.getElementById('solutionCanvas');
-    const ctx = canvas.getContext('2d');
+    let ctx = canvas.getContext('2d'); // Инициализация контекста
     let panelOpen = false;
 
     // Кнопка "Действия"
@@ -231,10 +231,11 @@
         // Устанавливаем размер canvas
         const requiredWidth = 150 + steps.length * 200 + 300;
         const requiredHeight = 150 + steps.length * 120 + 150;
-        if (requiredWidth > canvas.width) canvas.width = requiredWidth;
-        if (requiredHeight > canvas.height) canvas.height = requiredHeight;
+        canvas.width = requiredWidth; // Прямое присваивание
+        canvas.height = requiredHeight; // Прямое присваивание
 
-        // Очищаем и настраиваем контекст
+        // Переинициализация контекста после изменения размера
+        ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = "24px monospace";
         ctx.fillStyle = "#e0e0e0";
