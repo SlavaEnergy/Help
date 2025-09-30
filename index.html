@@ -16,24 +16,21 @@
       align-items: center;
       overflow: hidden;
     }
-
     #mainScreen {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-
     #robot {
       width: 360px;
       transition: all 0.6s ease;
     }
-
     #question {
       font-size: 28px;
       text-align: center;
       margin-bottom: 15px;
     }
-
+    /* Контейнер для кнопки и панели */
     #actionsContainer {
       position: absolute;
       bottom: 20px;
@@ -43,7 +40,6 @@
       flex-direction: column;
       align-items: center;
     }
-
     #actionsBtn {
       padding: 10px 20px;
       font-size: 18px;
@@ -53,7 +49,6 @@
       border: 1px solid #333;
       border-radius: 5px;
     }
-
     #actionsPanel {
       display: none;
       flex-direction: column;
@@ -64,12 +59,10 @@
       overflow: hidden;
       animation: slideDown 0.3s ease forwards;
     }
-
     @keyframes slideDown {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     #actionsPanel button {
       background: #333;
       color: #e0e0e0;
@@ -81,7 +74,7 @@
     #actionsPanel button:hover {
       background: #444;
     }
-
+    /* Конвертер на всю страницу с прокруткой */
     #converter {
       display: none;
       position: absolute;
@@ -106,14 +99,12 @@
       font-family: monospace;
       overflow: auto;
     }
-
     #converter .input-row {
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
-
     #converter input, #converter select, #converter button {
       padding: 5px;
       font-size: 16px;
@@ -122,32 +113,31 @@
       border: 1px solid #444;
       border-radius: 4px;
     }
-
+    /* Контейнер для решения с прокруткой */
     #solutionContainer {
       width: 100%;
       overflow-x: auto;
       margin-top: 20px;
     }
-
     #solutionCanvas {
       background: transparent;
     }
   </style>
 </head>
 <body>
-
+  <!-- Главный экран -->
   <div id="mainScreen">
     <div id="question">Чем вам помочь?</div>
     <img id="robot" src="robot.png" alt="Робот">
   </div>
-
+  <!-- Кнопка и панель действий -->
   <div id="actionsContainer">
     <div id="actionsPanel">
       <button id="converterBtn">Конвертер систем счисления</button>
     </div>
     <button id="actionsBtn">Действия</button>
   </div>
-
+  <!-- Конвертер -->
   <div id="converter">
     <div class="input-row">
       <select id="fromBase">
@@ -156,24 +146,20 @@
         <option value="10" selected>Из десятичной</option>
         <option value="16">Из шестнадцатеричной</option>
       </select>
-
       <input type="text" id="numberInput" placeholder="Введите число">
-
       <select id="toBase">
         <option value="2">В двоичную</option>
         <option value="8">В восьмеричную</option>
         <option value="10">В десятичную</option>
         <option value="16" selected>В шестнадцатеричную</option>
       </select>
-
       <button id="convertBtn">Перевести</button>
     </div>
-
+    <!-- Контейнер для решения с прокруткой -->
     <div id="solutionContainer">
       <canvas id="solutionCanvas" width="3000" height="1500"></canvas>
     </div>
   </div>
-
   <script>
     const actionsBtn = document.getElementById('actionsBtn');
     const actionsPanel = document.getElementById('actionsPanel');
@@ -187,25 +173,24 @@
     const convertBtn = document.getElementById('convertBtn');
     const canvas = document.getElementById('solutionCanvas');
     const ctx = canvas.getContext('2d');
-
     let panelOpen = false;
-
+    // Кнопка "Действия"
     actionsBtn.addEventListener('click', () => {
       actionsPanel.style.display = panelOpen ? 'none' : 'flex';
       panelOpen = !panelOpen;
     });
-
+    // Открытие конвертера
     converterBtn.addEventListener('click', () => {
       mainScreen.style.display = 'none';
       actionsPanel.style.display = 'none';
       converter.style.display = 'block';
-
+      // робот внизу справа
       robot.style.position = 'absolute';
       robot.style.width = '80px';
       robot.style.bottom = '20px';
       robot.style.right = '20px';
       document.body.appendChild(robot);
-
+      // клик по роботу = возврат
       robot.onclick = () => {
         converter.style.display = 'none';
         mainScreen.style.display = 'flex';
@@ -216,117 +201,148 @@
         robot.onclick = null;
       };
     });
-
+    // Исправленная функция рисования столбика
     function drawColumnDivision(number, base) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = "24px monospace";
       ctx.fillStyle = "#e0e0e0";
-
       let n = number;
       let steps = [];
 
-      // собираем шаги деления
-      while (n > 0) {
+      console.log("Начальное число:", number, "Основание:", base);
+
+      // Собираем все шаги деления
+      while (n >= base) {
         let q = Math.floor(n / base);
         let r = n % base;
-        steps.push({q, r, n});
+        steps.push({ q, r, n });
+        console.log(`Шаг ${steps.length}: ${n} ÷ ${base} = ${q} (ост. ${r})`);
         n = q;
-        if (q === 0) break;
       }
+
+      // Добавляем последний остаток
+      if (n > 0 || steps.length === 0) {
+        steps.push({ q: 0, r: n, n: n });
+        console.log(`Последний шаг: остаток ${n}`);
+      }
+
+      console.log("Всего шагов:", steps.length);
+      console.log("Все шаги:", steps);
 
       let startX = 150;
       let startY = 150;
-      let stepOffsetX = 200;
-      let stepOffsetY = 120;
+      let stepOffsetY = 60; // Уменьшаем смещение по Y для компактности
+      let lineWidth = 120;
 
-      // подстраиваем canvas
-      canvas.width = startX + steps.length * stepOffsetX + 300;
-      canvas.height = startY + steps.length * stepOffsetY + 300;
-
+      // Рисуем заголовок
       ctx.font = "bold 26px monospace";
       ctx.fillText(`Перевод числа ${number} из десятичной в систему с основанием ${base}`, startX, startY - 60);
       ctx.font = "24px monospace";
 
+      // Рисуем вертикальный столбик деления
       for (let i = 0; i < steps.length; i++) {
         const s = steps[i];
-        const xPos = startX + i * stepOffsetX;
         const yPos = startY + i * stepOffsetY;
 
-        ctx.fillText(s.n.toString(base).toUpperCase(), xPos, yPos);
+        // Рисуем делимое (число слева от черты)
+        ctx.fillText(s.n, startX, yPos);
 
+        // Рисуем вертикальную черту (|)
         if (i < steps.length - 1) {
-          ctx.fillText("÷", xPos + 60, yPos);
-          ctx.fillText(base, xPos + 90, yPos);
-          ctx.fillText("= " + s.q.toString(base).toUpperCase(), xPos, yPos + 35);
+          ctx.beginPath();
+          ctx.moveTo(startX + 40, yPos - 15);
+          ctx.lineTo(startX + 40, yPos + 8);
+          ctx.strokeStyle = "#e0e0e0";
+          ctx.stroke();
+        }
+
+        // Рисуем делитель (основание) справа от черты
+        if (i < steps.length - 1) {
+          ctx.fillText(base, startX + 50, yPos);
+        }
+
+        // Рисуем горизонтальную черту (под делимым)
+        ctx.beginPath();
+        ctx.moveTo(startX, yPos + 8);
+        ctx.lineTo(startX + lineWidth, yPos + 8);
+        ctx.stroke();
+
+        // Рисуем частное (результат деления под чертой)
+        if (i < steps.length - 1) {
+          ctx.fillText(s.q, startX + 50, yPos + 35);
         } else {
-          ctx.fillText("→", xPos + 60, yPos);
-          ctx.fillText("финал", xPos + 90, yPos);
-          ctx.fillText("= " + s.q.toString(base).toUpperCase(), xPos, yPos + 35);
+          ctx.fillText("-", startX + 50, yPos + 35); // Для последнего шага
         }
 
-        ctx.fillText("ост. " + s.r.toString(base).toUpperCase(), xPos + 140, yPos + 35);
-
-        if (i < steps.length - 1) {
-          const nextX = startX + (i + 1) * stepOffsetX;
-          const nextY = startY + (i + 1) * stepOffsetY;
-
-          ctx.beginPath();
-          ctx.moveTo(xPos + 80, yPos + 45);
-          ctx.lineTo(xPos + 80, nextY - 15);
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.moveTo(xPos + 80, nextY - 15);
-          ctx.lineTo(nextX - 10, nextY - 15);
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.moveTo(nextX - 10, nextY - 15);
-          ctx.lineTo(nextX - 20, nextY - 25);
-          ctx.lineTo(nextX - 10, nextY - 15);
-          ctx.lineTo(nextX - 20, nextY - 5);
-          ctx.stroke();
-        }
+        // Рисуем остаток (справа от черты)
+        ctx.fillText("ост. " + s.r, startX + lineWidth + 20, yPos);
       }
 
-      let result = steps.map(s => s.r.toString(base).toUpperCase()).reverse().join("");
-      ctx.font = "bold 28px monospace";
-      ctx.fillText("Итоговый результат: " + result, startX, startY + steps.length * stepOffsetY + 80);
+      // Собираем итоговый результат из остатков (снизу вверх)
+      let result = "";
+      for (let i = steps.length - 1; i >= 0; i--) {
+        result += steps[i].r.toString(base).toUpperCase();
+      }
 
+      console.log("Итоговый результат:", result);
+
+      // Рисуем итоговый результат
+      const finalY = startY + steps.length * stepOffsetY + 80;
+      ctx.font = "bold 28px monospace";
+      ctx.fillText("Итоговый результат: " + result, startX, finalY);
+
+      // Объяснение процесса сборки результата
       ctx.font = "20px monospace";
       ctx.fillStyle = "#888";
       const remainders = steps.map(s => s.r.toString(base).toUpperCase()).reverse();
-      ctx.fillText("(остатки читаются снизу вверх: " + remainders.join(" ← ") + ")", startX, startY + steps.length * stepOffsetY + 120);
+      ctx.fillText("(остатки читаются снизу вверх: " + remainders.join(" ← ") + ")", startX, finalY + 30);
       ctx.fillStyle = "#e0e0e0";
-    }
 
+      // Подстраиваем размер canvas под содержимое
+      const requiredWidth = startX + lineWidth + 300;
+      const requiredHeight = finalY + 100;
+
+      if (requiredWidth > canvas.width) {
+        canvas.width = requiredWidth;
+      }
+      if (requiredHeight > canvas.height) {
+        canvas.height = requiredHeight;
+      }
+    }
+    // Кнопка "Перевести"
     convertBtn.addEventListener('click', () => {
       const numStr = numberInput.value.trim();
       const from = parseInt(fromBase.value);
       const to = parseInt(toBase.value);
       if (!numStr) return;
-
+      // Проверяем корректность ввода для разных систем счисления
       let decimal;
       if (from === 10) {
         decimal = parseInt(numStr, 10);
       } else {
-        const validChars = {2: /^[01]+$/, 8: /^[0-7]+$/, 16: /^[0-9A-Fa-f]+$/};
+        // Для не-десятичных систем проверяем допустимые символы
+        const validChars = {
+          2: /^[01]+$/,
+          8: /^[0-7]+$/,
+          16: /^[0-9A-Fa-f]+$/
+        };
+       
         if (validChars[from] && !validChars[from].test(numStr)) {
-          ctx.clearRect(0,0,canvas.width,canvas.height);
-          ctx.fillText("Ошибка: некорректное число для выбранной системы!",100,100);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillText("Ошибка: некорректное число для выбранной системы!", 100, 100);
           return;
         }
+       
         decimal = parseInt(numStr, from);
       }
-
       if (isNaN(decimal)) {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillText("Ошибка: некорректное число!",100,100);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillText("Ошибка: некорректное число!", 100, 100);
         return;
       }
-
+      // Для перевода в десятичную систему показываем просто результат
       if (to === 10) {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = "bold 24px monospace";
         ctx.fillText(`Результат: ${decimal}`, 100, 100);
       } else {
@@ -334,6 +350,5 @@
       }
     });
   </script>
-
 </body>
 </html>
