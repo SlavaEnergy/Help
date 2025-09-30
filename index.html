@@ -228,7 +228,7 @@
       };
     });
 
-    // Улучшенная функция рисования столбика с диагональным расположением "лесенкой"
+    // Исправленная функция рисования столбика
     function drawColumnDivision(number, base) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = "20px monospace";
@@ -237,16 +237,15 @@
       let n = number;
       let steps = [];
       
-      // Собираем все шаги деления до тех пор, пока число больше или равно основанию
-      while (n >= base) {
+      // ИСПРАВЛЕНО: Правильный сбор всех шагов деления
+      while (n > 0) {
         let q = Math.floor(n / base);
         let r = n % base;
         steps.push({q, r, n});
         n = q;
-      }
-      // Последний остаток - это первая цифра результата
-      if (n > 0 || steps.length === 0) {
-        steps.push({q: 0, r: n, n: n});
+        
+        // Для отладки выводим в консоль
+        console.log(`n=${n}, q=${q}, r=${r}`);
       }
 
       let startX = 100;
@@ -356,6 +355,10 @@
       if (requiredHeight > canvas.height) {
         canvas.height = requiredHeight;
       }
+      
+      // Отладочная информация
+      console.log("Все шаги:", steps);
+      console.log("Итоговый результат:", result);
     }
 
     // Кнопка "Перевести"
