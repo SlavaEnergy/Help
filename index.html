@@ -201,131 +201,114 @@
         robot.onclick = null;
       };
     });
-    // ИСПРАВЛЕННАЯ функция рисования столбика
+    // Исправленная функция рисования столбика
     function drawColumnDivision(number, base) {
       let n = number;
       let steps = [];
- 
+
       console.log("Начальное число:", number, "Основание:", base);
- 
+
+      // Сбор всех шагов деления
       while (n >= base) {
         let q = Math.floor(n / base);
         let r = n % base;
-        steps.push({q, r, n});
-        console.log(`Шаг ${steps.length}: ${n} ÷ ${base} = ${q} (ост. ${r})`);
+        steps.push({ q: q, r: r, n: n });
+        console.log(`Шаг: ${n} ÷ ${base} = ${q} (ост. ${r})`);
         n = q;
       }
- 
       if (n > 0 || steps.length === 0) {
-        steps.push({q: 0, r: n, n: n});
+        steps.push({ q: 0, r: n, n: n });
         console.log(`Последний шаг: остаток ${n}`);
       }
- 
-      console.log("Всего шагов:", steps.length);
+
       console.log("Все шаги:", steps);
- 
-      // Рассчитываем требуемый размер canvas ПЕРЕД рисованием
+
+      // Рассчитываем размер canvas до рисования
       const requiredWidth = 150 + steps.length * 200 + 300; // Старт + шаги * смещение + запас
       const requiredHeight = 150 + steps.length * 120 + 150; // Старт + шаги * смещение + итог + запас
-      if (requiredWidth > canvas.width) {
-        canvas.width = requiredWidth;
-      }
-      if (requiredHeight > canvas.height) {
-        canvas.height = requiredHeight;
-      }
- 
-      // Теперь очищаем и рисуем
+      if (requiredWidth > canvas.width) canvas.width = requiredWidth;
+      if (requiredHeight > canvas.height) canvas.height = requiredHeight;
+
+      // Очищаем и настраиваем контекст
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = "24px monospace";
       ctx.fillStyle = "#e0e0e0";
       ctx.strokeStyle = "#e0e0e0";
- 
+
       // Заголовок
       ctx.font = "bold 26px monospace";
       ctx.fillText(`Перевод числа ${number} из десятичной в систему с основанием ${base}`, 150, 90);
       ctx.font = "24px monospace";
- 
+
       let startX = 150;
       let startY = 150;
       let stepOffsetX = 200;
       let stepOffsetY = 120;
- 
+
+      // Рисуем все шаги
       for (let i = 0; i < steps.length; i++) {
         const s = steps[i];
         const xPos = startX + i * stepOffsetX;
         const yPos = startY + i * stepOffsetY;
-        console.log(`Рисуем шаг ${i} в позиции (${xPos}, ${yPos}):`, s);
- 
-        // Текущее число (делимое)
+        console.log(`Рисую шаг ${i} в (${xPos}, ${yPos}): ${s.n} ÷ ${base}`);
+
+        // Делимое
         ctx.fillText(s.n.toString(), xPos, yPos);
- 
+
         if (i < steps.length - 1) {
           // Знак деления и основание
           ctx.fillText("÷", xPos + 60, yPos);
           ctx.fillText(base.toString(), xPos + 90, yPos);
- 
-          // Горизонтальная линия под делимым
+
+          // Линия под делимым
           ctx.beginPath();
           ctx.moveTo(xPos, yPos + 8);
           ctx.lineTo(xPos + 120, yPos + 8);
           ctx.stroke();
- 
-          // Результат деления (под чертой)
+
+          // Частное
           ctx.fillText("= " + s.q.toString(), xPos, yPos + 35);
- 
-          // Остаток (справа)
+
+          // Остаток
           ctx.fillText("ост. " + s.r.toString(), xPos + 140, yPos + 35);
- 
-          // Стрелка к следующему делимому
+
+          // Стрелка к следующему шагу
           const nextX = startX + (i + 1) * stepOffsetX;
           const nextY = startY + (i + 1) * stepOffsetY;
- 
           ctx.beginPath();
           ctx.moveTo(xPos + 80, yPos + 45);
           ctx.lineTo(xPos + 80, nextY - 15);
-          ctx.stroke();
- 
-          ctx.beginPath();
-          ctx.moveTo(xPos + 80, nextY - 15);
           ctx.lineTo(nextX - 10, nextY - 15);
           ctx.stroke();
- 
           ctx.beginPath();
           ctx.moveTo(nextX - 10, nextY - 15);
           ctx.lineTo(nextX - 20, nextY - 25);
-          ctx.lineTo(nextX - 10, nextY - 15);
+          ctx.moveTo(nextX - 10, nextY - 15);
           ctx.lineTo(nextX - 20, nextY - 5);
           ctx.stroke();
         } else {
-          // Для последнего шага: стрелка и финал
+          // Последний шаг
           ctx.fillText("→", xPos + 60, yPos);
           ctx.fillText("финал", xPos + 90, yPos);
- 
-          // Остаток (справа)
           ctx.fillText("ост. " + s.r.toString(), xPos + 140, yPos + 35);
         }
       }
- 
-      // Собираем итоговый результат из остатков (снизу вверх)
+
+      // Итоговый результат
       let result = "";
       for (let i = steps.length - 1; i >= 0; i--) {
         result += steps[i].r.toString(base).toUpperCase();
       }
- 
-      console.log("Итоговый результат:", result);
- 
-      // Рисуем итоговый результат под всем решением
+      console.log("Итог:", result);
+
       const finalX = startX;
       const finalY = startY + steps.length * stepOffsetY + 80;
- 
       ctx.font = "bold 28px monospace";
       ctx.fillText("Итоговый результат: " + result, finalX, finalY);
- 
-      // Объяснение процесса сборки результата
       ctx.font = "20px monospace";
       ctx.fillStyle = "#888";
       const remainders = steps.map(s => s.r.toString(base).toUpperCase()).reverse();
-      ctx.fillText("(остатки читаются снизу вверх: " + remainders.join(" ← ") + ")", finalX, finalY + 30);
+      ctx.fillText("(остатки снизу вверх: " + remainders.join(" ← ") + ")", finalX, finalY + 30);
       ctx.fillStyle = "#e0e0e0";
     }
     // Кнопка "Перевести"
@@ -334,24 +317,20 @@
       const from = parseInt(fromBase.value);
       const to = parseInt(toBase.value);
       if (!numStr) return;
-      // Проверяем корректность ввода для разных систем счисления
       let decimal;
       if (from === 10) {
         decimal = parseInt(numStr, 10);
       } else {
-        // Для не-десятичных систем проверяем допустимые символы
         const validChars = {
           2: /^[01]+$/,
           8: /^[0-7]+$/,
           16: /^[0-9A-Fa-f]+$/
         };
-       
         if (validChars[from] && !validChars[from].test(numStr)) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.fillText("Ошибка: некорректное число для выбранной системы!", 100, 100);
+          ctx.fillText("Ошибка: некорректное число для системы!", 100, 100);
           return;
         }
-       
         decimal = parseInt(numStr, from);
       }
       if (isNaN(decimal)) {
@@ -359,7 +338,6 @@
         ctx.fillText("Ошибка: некорректное число!", 100, 100);
         return;
       }
-      // Для перевода в десятичную систему показываем просто результат
       if (to === 10) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = "bold 24px monospace";
