@@ -118,11 +118,11 @@
       width: 100%;
       overflow-x: auto;
       margin-top: 20px;
-      position: relative; /* Ensure proper positioning */
+      position: relative;
     }
     #solutionCanvas {
       background: transparent;
-      display: block; /* Ensure canvas is treated as a block element */
+      display: block;
     }
   </style>
 </head>
@@ -162,7 +162,8 @@
       <canvas id="solutionCanvas" width="3000" height="1500"></canvas>
     </div>
   </div>
-  <script>
+  <script defer>
+    // DOM elements
     const actionsBtn = document.getElementById('actionsBtn');
     const actionsPanel = document.getElementById('actionsPanel');
     const converterBtn = document.getElementById('converterBtn');
@@ -176,23 +177,23 @@
     const canvas = document.getElementById('solutionCanvas');
     const ctx = canvas.getContext('2d');
     let panelOpen = false;
+
     // Кнопка "Действия"
     actionsBtn.addEventListener('click', () => {
       actionsPanel.style.display = panelOpen ? 'none' : 'flex';
       panelOpen = !panelOpen;
     });
+
     // Открытие конвертера
     converterBtn.addEventListener('click', () => {
       mainScreen.style.display = 'none';
       actionsPanel.style.display = 'none';
       converter.style.display = 'block';
-      // робот внизу справа
       robot.style.position = 'absolute';
       robot.style.width = '80px';
       robot.style.bottom = '20px';
       robot.style.right = '20px';
       document.body.appendChild(robot);
-      // клик по роботу = возврат
       robot.onclick = () => {
         converter.style.display = 'none';
         mainScreen.style.display = 'flex';
@@ -203,155 +204,154 @@
         robot.onclick = null;
       };
     });
-    // Исправленная функция рисования столбика
+
+    // Функция рисования столбика
     function drawColumnDivision(number, base) {
-      let n = number;
-      let steps = [];
+      try {
+        let n = number;
+        let steps = [];
 
-      console.log("Начальное число:", number, "Основание:", base);
+        console.log("Начальное число:", number, "Основание:", base);
 
-      // Сбор всех шагов деления
-      while (n >= base) {
-        let q = Math.floor(n / base);
-        let r = n % base;
-        steps.push({ q: q, r: r, n: n });
-        console.log(`Шаг: ${n} ÷ ${base} = ${q} (ост. ${r})`);
-        n = q;
-      }
-      if (n > 0 || steps.length === 0) {
-        steps.push({ q: 0, r: n, n: n });
-        console.log(`Последний шаг: остаток ${n}`);
-      }
-
-      console.log("Все шаги:", steps);
-
-      // Рассчитываем размер canvas до рисования
-      const requiredWidth = 150 + steps.length * 200 + 300;
-      const requiredHeight = 150 + steps.length * 120 + 150;
-      if (requiredWidth > canvas.width) canvas.width = requiredWidth;
-      if (requiredHeight > canvas.height) canvas.height = requiredHeight;
-
-      // Принудительный сброс контекста после изменения размера
-      ctx = canvas.getContext('2d'); // Переинициализация контекста
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.font = "24px monospace";
-      ctx.fillStyle = "#e0e0e0";
-      ctx.strokeStyle = "#e0e0e0";
-
-      // Заголовок
-      ctx.font = "bold 26px monospace";
-      ctx.fillText(`Перевод числа ${number} из десятичной в систему с основанием ${base}`, 150, 90);
-      ctx.font = "24px monospace";
-
-      let startX = 150;
-      let startY = 150;
-      let stepOffsetX = 200;
-      let stepOffsetY = 120;
-
-      // Рисуем все шаги
-      for (let i = 0; i < steps.length; i++) {
-        const s = steps[i];
-        const xPos = startX + i * stepOffsetX;
-        const yPos = startY + i * stepOffsetY;
-        console.log(`Рисую шаг ${i} в (${xPos}, ${yPos}): ${s.n} ÷ ${base}`);
-
-        // Делимое
-        ctx.fillText(s.n.toString(), xPos, yPos);
-
-        if (i < steps.length - 1) {
-          // Знак деления и основание
-          ctx.fillText("÷", xPos + 60, yPos);
-          ctx.fillText(base.toString(), xPos + 90, yPos);
-
-          // Линия под делимым
-          ctx.beginPath();
-          ctx.moveTo(xPos, yPos + 8);
-          ctx.lineTo(xPos + 120, yPos + 8);
-          ctx.stroke();
-
-          // Частное
-          ctx.fillText("= " + s.q.toString(), xPos, yPos + 35);
-
-          // Остаток
-          ctx.fillText("ост. " + s.r.toString(), xPos + 140, yPos + 35);
-
-          // Стрелка к следующему шагу
-          const nextX = startX + (i + 1) * stepOffsetX;
-          const nextY = startY + (i + 1) * stepOffsetY;
-          ctx.beginPath();
-          ctx.moveTo(xPos + 80, yPos + 45);
-          ctx.lineTo(xPos + 80, nextY - 15);
-          ctx.lineTo(nextX - 10, nextY - 15);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(nextX - 10, nextY - 15);
-          ctx.lineTo(nextX - 20, nextY - 25);
-          ctx.moveTo(nextX - 10, nextY - 15);
-          ctx.lineTo(nextX - 20, nextY - 5);
-          ctx.stroke();
-        } else {
-          // Последний шаг
-          ctx.fillText("→", xPos + 60, yPos);
-          ctx.fillText("финал", xPos + 90, yPos);
-          ctx.fillText("ост. " + s.r.toString(), xPos + 140, yPos + 35);
+        // Сбор шагов деления
+        while (n >= base) {
+          let q = Math.floor(n / base);
+          let r = n % base;
+          steps.push({ q: q, r: r, n: n });
+          console.log(`Шаг: ${n} ÷ ${base} = ${q} (ост. ${r})`);
+          n = q;
         }
+        if (n > 0 || steps.length === 0) {
+          steps.push({ q: 0, r: n, n: n });
+          console.log(`Последний шаг: остаток ${n}`);
+        }
+
+        console.log("Все шаги:", steps);
+
+        // Устанавливаем размер canvas
+        const requiredWidth = 150 + steps.length * 200 + 300;
+        const requiredHeight = 150 + steps.length * 120 + 150;
+        if (requiredWidth > canvas.width) canvas.width = requiredWidth;
+        if (requiredHeight > canvas.height) canvas.height = requiredHeight;
+
+        // Очищаем и настраиваем контекст
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = "24px monospace";
+        ctx.fillStyle = "#e0e0e0";
+        ctx.strokeStyle = "#e0e0e0";
+
+        // Заголовок
+        ctx.font = "bold 26px monospace";
+        ctx.fillText(`Перевод числа ${number} из десятичной в систему с основанием ${base}`, 150, 90);
+        ctx.font = "24px monospace";
+
+        let startX = 150;
+        let startY = 150;
+        let stepOffsetX = 200;
+        let stepOffsetY = 120;
+
+        // Рисуем шаги
+        for (let i = 0; i < steps.length; i++) {
+          const s = steps[i];
+          const xPos = startX + i * stepOffsetX;
+          const yPos = startY + i * stepOffsetY;
+          console.log(`Рисую шаг ${i} в (${xPos}, ${yPos}): ${s.n} ÷ ${base}`);
+
+          ctx.fillText(s.n.toString(), xPos, yPos);
+
+          if (i < steps.length - 1) {
+            ctx.fillText("÷", xPos + 60, yPos);
+            ctx.fillText(base.toString(), xPos + 90, yPos);
+            ctx.beginPath();
+            ctx.moveTo(xPos, yPos + 8);
+            ctx.lineTo(xPos + 120, yPos + 8);
+            ctx.stroke();
+            ctx.fillText("= " + s.q.toString(), xPos, yPos + 35);
+            ctx.fillText("ост. " + s.r.toString(), xPos + 140, yPos + 35);
+            const nextX = startX + (i + 1) * stepOffsetX;
+            const nextY = startY + (i + 1) * stepOffsetY;
+            ctx.beginPath();
+            ctx.moveTo(xPos + 80, yPos + 45);
+            ctx.lineTo(xPos + 80, nextY - 15);
+            ctx.lineTo(nextX - 10, nextY - 15);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(nextX - 10, nextY - 15);
+            ctx.lineTo(nextX - 20, nextY - 25);
+            ctx.moveTo(nextX - 10, nextY - 15);
+            ctx.lineTo(nextX - 20, nextY - 5);
+            ctx.stroke();
+          } else {
+            ctx.fillText("→", xPos + 60, yPos);
+            ctx.fillText("финал", xPos + 90, yPos);
+            ctx.fillText("ост. " + s.r.toString(), xPos + 140, yPos + 35);
+          }
+        }
+
+        // Итоговый результат
+        let result = "";
+        for (let i = steps.length - 1; i >= 0; i--) {
+          result += steps[i].r.toString(base).toUpperCase();
+        }
+        console.log("Итог:", result);
+
+        const finalX = startX;
+        const finalY = startY + steps.length * stepOffsetY + 80;
+        ctx.font = "bold 28px monospace";
+        ctx.fillText("Итоговый результат: " + result, finalX, finalY);
+        ctx.font = "20px monospace";
+        ctx.fillStyle = "#888";
+        const remainders = steps.map(s => s.r.toString(base).toUpperCase()).reverse();
+        ctx.fillText("(остатки снизу вверх: " + remainders.join(" ← ") + ")", finalX, finalY + 30);
+        ctx.fillStyle = "#e0e0e0";
+
+        // Принудительный перерендер
+        canvas.style.display = 'none';
+        canvas.offsetHeight;
+        canvas.style.display = 'block';
+      } catch (error) {
+        console.error("Ошибка в drawColumnDivision:", error);
       }
-
-      // Итоговый результат
-      let result = "";
-      for (let i = steps.length - 1; i >= 0; i--) {
-        result += steps[i].r.toString(base).toUpperCase();
-      }
-      console.log("Итог:", result);
-
-      const finalX = startX;
-      const finalY = startY + steps.length * stepOffsetY + 80;
-      ctx.font = "bold 28px monospace";
-      ctx.fillText("Итоговый результат: " + result, finalX, finalY);
-      ctx.font = "20px monospace";
-      ctx.fillStyle = "#888";
-      const remainders = steps.map(s => s.r.toString(base).toUpperCase()).reverse();
-      ctx.fillText("(остатки снизу вверх: " + remainders.join(" ← ") + ")", finalX, finalY + 30);
-      ctx.fillStyle = "#e0e0e0";
-
-      // Принудительный перерендер
-      canvas.style.display = 'none';
-      canvas.offsetHeight; // Trigger reflow
-      canvas.style.display = 'block';
     }
+
     // Кнопка "Перевести"
     convertBtn.addEventListener('click', () => {
-      const numStr = numberInput.value.trim();
-      const from = parseInt(fromBase.value);
-      const to = parseInt(toBase.value);
-      if (!numStr) return;
-      let decimal;
-      if (from === 10) {
-        decimal = parseInt(numStr, 10);
-      } else {
-        const validChars = {
-          2: /^[01]+$/,
-          8: /^[0-7]+$/,
-          16: /^[0-9A-Fa-f]+$/
-        };
-        if (validChars[from] && !validChars[from].test(numStr)) {
+      try {
+        console.log("Клик по 'Перевести'");
+        const numStr = numberInput.value.trim();
+        const from = parseInt(fromBase.value);
+        const to = parseInt(toBase.value);
+        if (!numStr) return;
+        let decimal;
+        if (from === 10) {
+          decimal = parseInt(numStr, 10);
+        } else {
+          const validChars = {
+            2: /^[01]+$/,
+            8: /^[0-7]+$/,
+            16: /^[0-9A-Fa-f]+$/
+          };
+          if (validChars[from] && !validChars[from].test(numStr)) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillText("Ошибка: некорректное число для системы!", 100, 100);
+            return;
+          }
+          decimal = parseInt(numStr, from);
+        }
+        if (isNaN(decimal)) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.fillText("Ошибка: некорректное число для системы!", 100, 100);
+          ctx.fillText("Ошибка: некорректное число!", 100, 100);
           return;
         }
-        decimal = parseInt(numStr, from);
-      }
-      if (isNaN(decimal)) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillText("Ошибка: некорректное число!", 100, 100);
-        return;
-      }
-      if (to === 10) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = "bold 24px monospace";
-        ctx.fillText(`Результат: ${decimal}`, 100, 100);
-      } else {
-        drawColumnDivision(decimal, to);
+        if (to === 10) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.font = "bold 24px monospace";
+          ctx.fillText(`Результат: ${decimal}`, 100, 100);
+        } else {
+          drawColumnDivision(decimal, to);
+        }
+      } catch (error) {
+        console.error("Ошибка в обработчике 'Перевести':", error);
       }
     });
   </script>
