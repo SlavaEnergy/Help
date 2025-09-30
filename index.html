@@ -228,7 +228,7 @@
       };
     });
 
-    // Исправленная функция рисования столбика с правильным позиционированием
+    // ИСПРАВЛЕННАЯ функция рисования столбика
     function drawColumnDivision(number, base) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = "24px monospace";
@@ -237,38 +237,58 @@
       let n = number;
       let steps = [];
       
-      // Собираем все шаги деления
-      while (n > 0) {
+      console.log("Начальное число:", number, "Основание:", base);
+      
+      // ИСПРАВЛЕНО: Правильный сбор всех шагов деления
+      while (n >= base) {  // Продолжаем пока число >= основания
         let q = Math.floor(n / base);
         let r = n % base;
         steps.push({q, r, n});
+        console.log(`Шаг ${steps.length}: ${n} ÷ ${base} = ${q} (ост. ${r})`);
         n = q;
       }
+      
+      // ИСПРАВЛЕНО: Добавляем последний остаток как отдельный шаг
+      if (n > 0 || steps.length === 0) {
+        steps.push({q: 0, r: n, n: n});
+        console.log(`Последний шаг: остаток ${n}`);
+      }
+      
+      console.log("Всего шагов:", steps.length);
+      console.log("Все шаги:", steps);
 
       let startX = 150;
       let startY = 150;
-      let stepOffsetX = 200;  // Увеличено расстояние по X
-      let stepOffsetY = 120;  // Увеличено расстояние по Y
+      let stepOffsetX = 200;
+      let stepOffsetY = 120;
 
       // Рисуем заголовок
       ctx.font = "bold 26px monospace";
       ctx.fillText(`Перевод числа ${number} из десятичной в систему с основанием ${base}`, startX, startY - 60);
       ctx.font = "24px monospace";
 
-      // Рисуем все шаги деления по диагонали вправо-вниз
+      // Рисуем все шаги деления
       for (let i = 0; i < steps.length; i++) {
         const s = steps[i];
         const xPos = startX + i * stepOffsetX;
         const yPos = startY + i * stepOffsetY;
 
-        // Текущее число (делимое) - больше шрифт и лучше позиционирование
+        console.log(`Рисуем шаг ${i} в позиции (${xPos}, ${yPos}):`, s);
+
+        // Текущее число (делимое)
         ctx.fillText(s.n, xPos, yPos);
         
-        // Знак деления и основание
-        ctx.fillText("÷", xPos + 60, yPos);
-        ctx.fillText(base, xPos + 90, yPos);
+        // Знак деления и основание (только если это не последний остаток)
+        if (i < steps.length - 1) {
+          ctx.fillText("÷", xPos + 60, yPos);
+          ctx.fillText(base, xPos + 90, yPos);
+        } else {
+          // Для последнего шага показываем, что это финальный остаток
+          ctx.fillText("→", xPos + 60, yPos);
+          ctx.fillText("финал", xPos + 90, yPos);
+        }
         
-        // Горизонтальная линия под делимым (длиннее)
+        // Горизонтальная линия под делимым
         ctx.beginPath();
         ctx.moveTo(xPos, yPos + 8);
         ctx.lineTo(xPos + 120, yPos + 8);
@@ -276,9 +296,13 @@
         ctx.stroke();
         
         // Результат деления (под чертой)
-        ctx.fillText("= " + s.q, xPos, yPos + 35);
+        if (i < steps.length - 1) {
+          ctx.fillText("= " + s.q, xPos, yPos + 35);
+        } else {
+          ctx.fillText("= -", xPos, yPos + 35); // Для последнего шага
+        }
         
-        // Остаток (справа, с большим отступом)
+        // Остаток (справа)
         ctx.fillText("ост. " + s.r, xPos + 140, yPos + 35);
 
         // Если есть следующий шаг, рисуем стрелку к следующему делимому
@@ -315,6 +339,8 @@
         result += steps[i].r.toString(base).toUpperCase();
       }
       
+      console.log("Итоговый результат:", result);
+
       // Рисуем итоговый результат под всем решением
       const finalX = startX;
       const finalY = startY + steps.length * stepOffsetY + 80;
@@ -325,8 +351,8 @@
       // Объяснение процесса сборки результата
       ctx.font = "20px monospace";
       ctx.fillStyle = "#888";
-      ctx.fillText("(остатки читаются снизу вверх: " + 
-        steps.map(s => s.r.toString(base).toUpperCase()).reverse().join(" ← ") + ")", 
+      const remainders = steps.map(s => s.r.toString(base).toUpperCase()).reverse();
+      ctx.fillText("(остатки читаются снизу вверх: " + remainders.join(" ← ") + ")", 
         finalX, finalY + 30);
       ctx.fillStyle = "#e0e0e0";
 
@@ -340,9 +366,6 @@
       if (requiredHeight > canvas.height) {
         canvas.height = requiredHeight;
       }
-      
-      console.log("Все шаги:", steps);
-      console.log("Итоговый результат:", result);
     }
 
     // Кнопка "Перевести"
