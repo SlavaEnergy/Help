@@ -34,7 +34,7 @@
       margin-bottom: 15px;
     }
 
-    /* ИЗМЕНЕНО: Контейнер для кнопки и панели */
+    /* Контейнер для кнопки и панели */
     #actionsContainer {
       position: absolute;
       bottom: 20px;
@@ -66,7 +66,6 @@
       animation: slideDown 0.3s ease forwards;
     }
 
-    /* ИЗМЕНЕНО: Анимация выезжания сверху */
     @keyframes slideDown {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -84,7 +83,7 @@
       background: #444;
     }
 
-    /* ИЗМЕНЕНО: Конвертер теперь на всю страницу с прокруткой */
+    /* Конвертер на всю страницу с прокруткой */
     #converter {
       display: none;
       position: absolute;
@@ -126,18 +125,15 @@
       border-radius: 4px;
     }
 
-    /* ИЗМЕНЕНО: Убрана рамка у canvas, добавлена адаптивность */
-    #solutionCanvas {
-      background: transparent;
-      max-width: 100%;
-      height: auto;
-    }
-
-    /* ИЗМЕНЕНО: Контейнер для решения с возможностью прокрутки */
+    /* Контейнер для решения с прокруткой */
     #solutionContainer {
       width: 100%;
       overflow-x: auto;
       margin-top: 20px;
+    }
+
+    #solutionCanvas {
+      background: transparent;
     }
   </style>
 </head>
@@ -149,7 +145,7 @@
     <img id="robot" src="robot.png" alt="Робот">
   </div>
 
-  <!-- ИЗМЕНЕНО: Кнопка и панель действий (теперь панель выше кнопки) -->
+  <!-- Кнопка и панель действий -->
   <div id="actionsContainer">
     <div id="actionsPanel">
       <button id="converterBtn">Конвертер систем счисления</button>
@@ -179,9 +175,9 @@
       <button id="convertBtn">Перевести</button>
     </div>
 
-    <!-- ИЗМЕНЕНО: Добавлен контейнер для решения с прокруткой -->
+    <!-- Контейнер для решения с прокруткой -->
     <div id="solutionContainer">
-      <canvas id="solutionCanvas" width="1200" height="600"></canvas>
+      <canvas id="solutionCanvas" width="2000" height="800"></canvas>
     </div>
   </div>
 
@@ -232,7 +228,7 @@
       };
     });
 
-    // ИЗМЕНЕНО: Улучшенная функция рисования столбика
+    // Улучшенная функция рисования столбика с горизонтальным расположением
     function drawColumnDivision(number, base) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = "20px monospace";
@@ -242,69 +238,106 @@
       let steps = [];
       
       // Собираем все шаги деления
-      while (n > 0) {
+      while (n >= base) {
         let q = Math.floor(n / base);
         let r = n % base;
         steps.push({q, r, n});
         n = q;
       }
+      // Добавляем последний шаг (если есть)
+      if (n > 0) {
+        steps.push({q: 0, r: n, n: n});
+      }
 
       let startX = 100;
       let startY = 100;
-      let lineHeight = 40;
-      let stepWidth = 120;
+      let stepWidth = 150;
+      let stepHeight = 60;
 
       // Рисуем заголовок
       ctx.font = "bold 22px monospace";
       ctx.fillText(`Перевод числа ${number} из десятичной в систему с основанием ${base}`, startX, startY - 40);
       ctx.font = "20px monospace";
 
-      // Рисуем первый шаг (делимое)
-      if (steps.length > 0) {
-        ctx.fillText(steps[0].n, startX, startY);
-        ctx.fillText("│" + base, startX + 40, startY);
-        
-        // Горизонтальная линия
-        ctx.beginPath();
-        ctx.moveTo(startX, startY + 10);
-        ctx.lineTo(startX + stepWidth, startY + 10);
-        ctx.strokeStyle = "#e0e0e0";
-        ctx.stroke();
-      }
-
-      // Рисуем все шаги деления
+      // Рисуем все шаги деления горизонтально
       for (let i = 0; i < steps.length; i++) {
         const s = steps[i];
-        const yPos = startY + lineHeight * (i + 1);
+        const xPos = startX + i * stepWidth;
+        const yPos = startY;
+
+        // Текущее число (делимое)
+        ctx.fillText(s.n, xPos, yPos);
         
-        // Результат деления
-        ctx.fillText(s.q, startX, yPos);
+        // Линия деления
+        ctx.beginPath();
+        ctx.moveTo(xPos, yPos + 5);
+        ctx.lineTo(xPos + 80, yPos + 5);
+        ctx.strokeStyle = "#e0e0e0";
+        ctx.stroke();
         
-        // Остаток справа
-        ctx.fillText("остаток: " + s.r, startX + stepWidth + 20, yPos);
+        // Делитель (основание системы)
+        ctx.fillText(base, xPos + 85, yPos);
         
-        // Вертикальная линия для следующего шага (кроме последнего)
+        // Результат деления (под чертой)
+        ctx.fillText(s.q, xPos, yPos + 25);
+        
+        // Остаток (справа)
+        ctx.fillText("ост: " + s.r, xPos + 90, yPos + 25);
+
+        // Стрелка к следующему шагу (если есть следующий шаг)
         if (i < steps.length - 1) {
           ctx.beginPath();
-          ctx.moveTo(startX + 30, yPos + 5);
-          ctx.lineTo(startX + 30, yPos + lineHeight - 5);
+          ctx.moveTo(xPos + stepWidth - 20, yPos + 40);
+          ctx.lineTo(xPos + stepWidth, yPos + 40);
+          ctx.lineTo(xPos + stepWidth, yPos + 60);
+          ctx.strokeStyle = "#e0e0e0";
           ctx.stroke();
           
-          // Горизонтальная линия
-          ctx.beginPath();
-          ctx.moveTo(startX, yPos + lineHeight - 10);
-          ctx.lineTo(startX + stepWidth, yPos + lineHeight - 10);
-          ctx.stroke();
+          // Текст "след."
+          ctx.fillText("след.", xPos + stepWidth - 25, yPos + 55);
         }
       }
 
-      // Итоговый результат
-      const result = number.toString(base).toUpperCase();
-      ctx.font = "bold 22px monospace";
-      ctx.fillText("Итог: " + result, startX, startY + lineHeight * (steps.length + 2));
+      // Итоговый результат (собираем из остатков снизу вверх)
+      let result = "";
+      for (let i = steps.length - 1; i >= 0; i--) {
+        result += steps[i].r.toString(base).toUpperCase();
+      }
       
-      // ИЗМЕНЕНО: Автоматически подстраиваем размер canvas под содержимое
-      const requiredHeight = startY + lineHeight * (steps.length + 3) + 40;
+      // Если результат пустой, используем последний остаток
+      if (result === "" && steps.length > 0) {
+        result = steps[steps.length - 1].r.toString(base).toUpperCase();
+      }
+      
+      // Рисуем итоговый результат под всем решением
+      const finalY = startY + stepHeight + 40;
+      ctx.font = "bold 24px monospace";
+      ctx.fillText("Итог: " + result, startX, finalY);
+      
+      // Рисуем стрелки от остатков к итоговому числу
+      ctx.strokeStyle = "#888";
+      ctx.setLineDash([5, 3]);
+      
+      for (let i = 0; i < steps.length; i++) {
+        const xPos = startX + i * stepWidth + 100;
+        const yPos = startY + 25;
+        
+        ctx.beginPath();
+        ctx.moveTo(xPos, yPos);
+        ctx.lineTo(xPos + 20, yPos);
+        ctx.lineTo(xPos + 20, finalY - 10);
+        ctx.lineTo(startX + (steps.length - 1 - i) * 30 + 50, finalY - 10);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Автоматически подстраиваем размер canvas под содержимое
+      const requiredWidth = startX + steps.length * stepWidth + 100;
+      const requiredHeight = finalY + 40;
+      
+      if (requiredWidth > canvas.width) {
+        canvas.width = requiredWidth;
+      }
       if (requiredHeight > canvas.height) {
         canvas.height = requiredHeight;
       }
