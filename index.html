@@ -1,193 +1,178 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Helper</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #121212;
-            color: #e0e0e0;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helper</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        #robot {
-            width: 100px;
-            transition: all 0.5s ease;
-        }
+    #robot {
+      width: 120px;
+      transition: all 0.6s ease;
+    }
 
-        #question {
-            margin-top: 10px;
-            font-size: 20px;
-            color: #ffffff;
-        }
+    #actionsBtn {
+      position: absolute;
+      bottom: 30px;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      background: #1f1f1f;
+      color: #e0e0e0;
+      border: 1px solid #333;
+      border-radius: 5px;
+    }
 
-        #actionsBtn {
-            position: absolute;
-            bottom: 30px;
-            padding: 10px 20px;
-            font-size: 18px;
-            cursor: pointer;
-            background-color: #1f1f1f;
-            color: #e0e0e0;
-            border: 1px solid #333;
-            border-radius: 5px;
-        }
+    #actionsPanel {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f1f1f;
+      border: 1px solid #333;
+      padding: 10px 20px;
+      border-radius: 8px;
+      transition: top 0.5s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
 
-        #actionsPanel {
-            position: absolute;
-            top: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1f1f1f;
-            border: 1px solid #333;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: top 0.5s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
+    #actionsPanel button {
+      background-color: #333;
+      color: #e0e0e0;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        #actionsPanel button {
-            background-color: #333;
-            color: #e0e0e0;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    #converter {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        #1c1c1c,
+        #1c1c1c 19px,
+        #222 20px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        #1c1c1c,
+        #1c1c1c 19px,
+        #222 20px
+      );
+      padding: 20px;
+      box-sizing: border-box;
+      font-family: monospace;
+      overflow: auto;
+    }
 
-        #converter {
-            display: none;
-            position: absolute;
-            top: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            height: 80%;
-            background: #1f1f1f;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            color: #e0e0e0;
-        }
+    #converter .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
 
-        #gridField {
-            flex: 1;
-            background: #2b2b2b;
-            margin-top: 20px;
-            padding: 10px;
-            font-family: monospace;
-            overflow: auto;
-            white-space: pre;
-            border-radius: 5px;
-        }
+    #converter input, #converter select, #converter button {
+      padding: 5px;
+      font-size: 16px;
+      background: #2b2b2b;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 4px;
+    }
 
-        .input-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        input, select, button {
-            padding: 5px;
-            font-size: 16px;
-            background-color: #2b2b2b;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            border-radius: 4px;
-        }
-
-        input::placeholder {
-            color: #aaa;
-        }
-
-        #outputSingle, #outputColumn {
-            margin-top: 10px;
-            font-family: monospace;
-            white-space: pre;
-        }
-
-    </style>
+    #solution {
+      white-space: pre;
+      line-height: 1.5em;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
 
-    <img id="robot" src="https://i.imgur.com/OzvWb9V.png" alt="Робот">
-    <div id="question">Чем вам помочь?</div>
+  <img id="robot" src="robot.png" alt="Робот">
 
-    <button id="actionsBtn">Действия</button>
+  <button id="actionsBtn">Действия</button>
 
-    <div id="actionsPanel">
-        <button id="converterBtn">Конвертер систем счисления</button>
+  <div id="actionsPanel">
+    <button id="converterBtn">Конвертер систем счисления</button>
+  </div>
+
+  <div id="converter">
+    <div class="input-row">
+      <input type="number" id="numberInput" placeholder="Введите число">
+      <select id="baseSelect">
+        <option value="2">Двоичная</option>
+        <option value="8">Восьмеричная</option>
+        <option value="10" selected>Десятичная</option>
+        <option value="16">Шестнадцатеричная</option>
+      </select>
+      <button id="convertBtn">Перевести</button>
     </div>
+    <div id="solution"></div>
+  </div>
 
-    <div id="converter">
-        <div class="input-row">
-            <input type="number" id="numberInput" placeholder="Введите число">
-            <select id="baseSelect">
-                <option value="2">Двоичная</option>
-                <option value="8">Восьмеричная</option>
-                <option value="10" selected>Десятичная</option>
-                <option value="16">Шестнадцатеричная</option>
-            </select>
-            <button id="convertBtn">Перевести</button>
-        </div>
-        <div id="gridField"></div>
-        <div id="outputSingle"></div>
-        <div id="outputColumn"></div>
-    </div>
+  <script>
+    const actionsBtn = document.getElementById('actionsBtn');
+    const actionsPanel = document.getElementById('actionsPanel');
+    const converterBtn = document.getElementById('converterBtn');
+    const converter = document.getElementById('converter');
+    const robot = document.getElementById('robot');
+    const numberInput = document.getElementById('numberInput');
+    const baseSelect = document.getElementById('baseSelect');
+    const convertBtn = document.getElementById('convertBtn');
+    const solution = document.getElementById('solution');
 
-    <script>
-        const actionsBtn = document.getElementById('actionsBtn');
-        const actionsPanel = document.getElementById('actionsPanel');
-        const converterBtn = document.getElementById('converterBtn');
-        const converter = document.getElementById('converter');
-        const robot = document.getElementById('robot');
-        const numberInput = document.getElementById('numberInput');
-        const baseSelect = document.getElementById('baseSelect');
-        const convertBtn = document.getElementById('convertBtn');
-        const gridField = document.getElementById('gridField');
-        const outputSingle = document.getElementById('outputSingle');
-        const outputColumn = document.getElementById('outputColumn');
+    let panelOpen = false;
 
-        let panelOpen = false;
+    actionsBtn.addEventListener('click', () => {
+      actionsPanel.style.top = panelOpen ? '-100px' : '50px';
+      panelOpen = !panelOpen;
+    });
 
-        actionsBtn.addEventListener('click', () => {
-            actionsPanel.style.top = panelOpen ? '-100px' : '50px';
-            panelOpen = !panelOpen;
-        });
+    converterBtn.addEventListener('click', () => {
+      converter.style.display = 'block';
+      robot.style.position = 'absolute';
+      robot.style.bottom = '20px';
+      robot.style.right = '20px';
+      robot.style.transform = 'scale(0.8)';
+    });
 
-        converterBtn.addEventListener('click', () => {
-            converter.style.display = 'flex';
-            robot.style.position = 'absolute';
-            robot.style.bottom = '20px';
-            robot.style.right = '20px';
-            robot.style.transform = 'scale(0.8)';
-        });
+    convertBtn.addEventListener('click', () => {
+      const number = parseInt(numberInput.value);
+      const base = parseInt(baseSelect.value);
 
-        convertBtn.addEventListener('click', () => {
-            const number = parseInt(numberInput.value);
-            const base = parseInt(baseSelect.value);
+      if (isNaN(number)) return;
 
-            if (isNaN(number)) return;
+      let n = number;
+      let steps = [];
+      while (n > 0) {
+        const q = Math.floor(n / base);
+        const r = n % base;
+        steps.push(`${n} : ${base} = ${q}, остаток ${r.toString(base).toUpperCase()}`);
+        n = q;
+      }
+      steps.reverse();
 
-            const converted = number.toString(base).toUpperCase();
-            const columnOutput = converted.split('').join('\n');
-
-            gridField.textContent = converted;
-            outputSingle.textContent = `Результат в одну строку: ${converted}`;
-            outputColumn.textContent = `Результат в столбик:\n${columnOutput}`;
-        });
-    </script>
+      const result = number.toString(base).toUpperCase();
+      solution.textContent = steps.join("\n") + `\n---\nИтог: ${result}`;
+    });
+  </script>
 
 </body>
 </html>
-
