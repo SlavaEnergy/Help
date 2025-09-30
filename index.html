@@ -118,9 +118,11 @@
       width: 100%;
       overflow-x: auto;
       margin-top: 20px;
+      position: relative; /* Ensure proper positioning */
     }
     #solutionCanvas {
       background: transparent;
+      display: block; /* Ensure canvas is treated as a block element */
     }
   </style>
 </head>
@@ -224,12 +226,13 @@
       console.log("Все шаги:", steps);
 
       // Рассчитываем размер canvas до рисования
-      const requiredWidth = 150 + steps.length * 200 + 300; // Старт + шаги * смещение + запас
-      const requiredHeight = 150 + steps.length * 120 + 150; // Старт + шаги * смещение + итог + запас
+      const requiredWidth = 150 + steps.length * 200 + 300;
+      const requiredHeight = 150 + steps.length * 120 + 150;
       if (requiredWidth > canvas.width) canvas.width = requiredWidth;
       if (requiredHeight > canvas.height) canvas.height = requiredHeight;
 
-      // Очищаем и настраиваем контекст
+      // Принудительный сброс контекста после изменения размера
+      ctx = canvas.getContext('2d'); // Переинициализация контекста
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = "24px monospace";
       ctx.fillStyle = "#e0e0e0";
@@ -310,6 +313,11 @@
       const remainders = steps.map(s => s.r.toString(base).toUpperCase()).reverse();
       ctx.fillText("(остатки снизу вверх: " + remainders.join(" ← ") + ")", finalX, finalY + 30);
       ctx.fillStyle = "#e0e0e0";
+
+      // Принудительный перерендер
+      canvas.style.display = 'none';
+      canvas.offsetHeight; // Trigger reflow
+      canvas.style.display = 'block';
     }
     // Кнопка "Перевести"
     convertBtn.addEventListener('click', () => {
