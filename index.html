@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Helper</title>
+  <title>Помощник-Робот</title>
   <style>
     body {
       margin: 0;
@@ -18,8 +18,14 @@
     }
 
     #robot {
-      width: 120px;
+      width: 360px; /* в 3 раза больше */
       transition: all 0.6s ease;
+    }
+
+    #question {
+      margin-top: 20px;
+      font-size: 28px;
+      text-align: center;
     }
 
     #actionsBtn {
@@ -100,30 +106,46 @@
       white-space: pre;
       line-height: 1.5em;
       margin-top: 10px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 
-  <img id="robot" src="robot.png" alt="Робот">
+  <!-- Главный экран -->
+  <div id="mainScreen">
+    <img id="robot" src="robot.png" alt="Робот">
+    <div id="question">Чем вам помочь?</div>
+    <button id="actionsBtn">Действия</button>
+  </div>
 
-  <button id="actionsBtn">Действия</button>
-
+  <!-- Панель действий -->
   <div id="actionsPanel">
     <button id="converterBtn">Конвертер систем счисления</button>
   </div>
 
+  <!-- Конвертер -->
   <div id="converter">
     <div class="input-row">
-      <input type="number" id="numberInput" placeholder="Введите число">
-      <select id="baseSelect">
-        <option value="2">Двоичная</option>
-        <option value="8">Восьмеричная</option>
-        <option value="10" selected>Десятичная</option>
-        <option value="16">Шестнадцатеричная</option>
+      <select id="fromBase">
+        <option value="2">Из двоичной</option>
+        <option value="8">Из восьмеричной</option>
+        <option value="10" selected>Из десятичной</option>
+        <option value="16">Из шестнадцатеричной</option>
       </select>
+
+      <input type="text" id="numberInput" placeholder="Введите число">
+
+      <select id="toBase">
+        <option value="2">В двоичную</option>
+        <option value="8">В восьмеричную</option>
+        <option value="10">В десятичную</option>
+        <option value="16" selected>В шестнадцатеричную</option>
+      </select>
+
       <button id="convertBtn">Перевести</button>
     </div>
+
     <div id="solution"></div>
   </div>
 
@@ -132,45 +154,62 @@
     const actionsPanel = document.getElementById('actionsPanel');
     const converterBtn = document.getElementById('converterBtn');
     const converter = document.getElementById('converter');
+    const mainScreen = document.getElementById('mainScreen');
     const robot = document.getElementById('robot');
     const numberInput = document.getElementById('numberInput');
-    const baseSelect = document.getElementById('baseSelect');
+    const fromBase = document.getElementById('fromBase');
+    const toBase = document.getElementById('toBase');
     const convertBtn = document.getElementById('convertBtn');
     const solution = document.getElementById('solution');
 
     let panelOpen = false;
 
+    // Кнопка "Действия"
     actionsBtn.addEventListener('click', () => {
       actionsPanel.style.top = panelOpen ? '-100px' : '50px';
       panelOpen = !panelOpen;
     });
 
+    // Открытие конвертера
     converterBtn.addEventListener('click', () => {
+      mainScreen.style.display = 'none';
       converter.style.display = 'block';
+
       robot.style.position = 'absolute';
+      robot.style.width = '80px';
       robot.style.bottom = '20px';
       robot.style.right = '20px';
-      robot.style.transform = 'scale(0.8)';
+      document.body.appendChild(robot);
+
+      // Клик по роботу = возврат
+      robot.onclick = () => {
+        converter.style.display = 'none';
+        mainScreen.style.display = 'flex';
+        mainScreen.style.flexDirection = 'column';
+        mainScreen.style.alignItems = 'center';
+        robot.style.position = 'static';
+        robot.style.width = '360px';
+        robot.onclick = null;
+      };
     });
 
+    // Перевод числа
     convertBtn.addEventListener('click', () => {
-      const number = parseInt(numberInput.value);
-      const base = parseInt(baseSelect.value);
+      const numStr = numberInput.value.trim();
+      const from = parseInt(fromBase.value);
+      const to = parseInt(toBase.value);
 
-      if (isNaN(number)) return;
+      if (!numStr) return;
 
-      let n = number;
-      let steps = [];
-      while (n > 0) {
-        const q = Math.floor(n / base);
-        const r = n % base;
-        steps.push(`${n} : ${base} = ${q}, остаток ${r.toString(base).toUpperCase()}`);
-        n = q;
+      // Переводим в десятичную, потом в нужную систему
+      const decimal = parseInt(numStr, from);
+      if (isNaN(decimal)) {
+        solution.textContent = "Ошибка: некорректное число!";
+        return;
       }
-      steps.reverse();
 
-      const result = number.toString(base).toUpperCase();
-      solution.textContent = steps.join("\n") + `\n---\nИтог: ${result}`;
+      const result = decimal.toString(to).toUpperCase();
+      solution.textContent = `${numStr} (осн. ${from}) = ${result} (осн. ${to})`;
     });
   </script>
 
