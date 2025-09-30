@@ -177,7 +177,7 @@
 
     <!-- Контейнер для решения с прокруткой -->
     <div id="solutionContainer">
-      <canvas id="solutionCanvas" width="2000" height="800"></canvas>
+      <canvas id="solutionCanvas" width="2000" height="1200"></canvas>
     </div>
   </div>
 
@@ -228,7 +228,7 @@
       };
     });
 
-    // Улучшенная функция рисования столбика с горизонтальным расположением
+    // Улучшенная функция рисования столбика с диагональным расположением "лесенкой"
     function drawColumnDivision(number, base) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = "20px monospace";
@@ -237,103 +237,118 @@
       let n = number;
       let steps = [];
       
-      // Собираем все шаги деления
+      // Собираем все шаги деления до тех пор, пока число больше или равно основанию
       while (n >= base) {
         let q = Math.floor(n / base);
         let r = n % base;
         steps.push({q, r, n});
         n = q;
       }
-      // Добавляем последний шаг (если есть)
-      if (n > 0) {
+      // Последний остаток - это первая цифра результата
+      if (n > 0 || steps.length === 0) {
         steps.push({q: 0, r: n, n: n});
       }
 
       let startX = 100;
       let startY = 100;
-      let stepWidth = 150;
-      let stepHeight = 60;
+      let stepOffsetX = 120;
+      let stepOffsetY = 80;
 
       // Рисуем заголовок
       ctx.font = "bold 22px monospace";
       ctx.fillText(`Перевод числа ${number} из десятичной в систему с основанием ${base}`, startX, startY - 40);
       ctx.font = "20px monospace";
 
-      // Рисуем все шаги деления горизонтально
+      // Рисуем все шаги деления по диагонали вправо-вниз
       for (let i = 0; i < steps.length; i++) {
         const s = steps[i];
-        const xPos = startX + i * stepWidth;
-        const yPos = startY;
+        const xPos = startX + i * stepOffsetX;
+        const yPos = startY + i * stepOffsetY;
 
         // Текущее число (делимое)
         ctx.fillText(s.n, xPos, yPos);
         
-        // Линия деления
+        // Знак деления и основание
+        ctx.fillText("÷", xPos + 40, yPos);
+        ctx.fillText(base, xPos + 60, yPos);
+        
+        // Горизонтальная линия под делимым
         ctx.beginPath();
         ctx.moveTo(xPos, yPos + 5);
         ctx.lineTo(xPos + 80, yPos + 5);
         ctx.strokeStyle = "#e0e0e0";
         ctx.stroke();
         
-        // Делитель (основание системы)
-        ctx.fillText(base, xPos + 85, yPos);
-        
         // Результат деления (под чертой)
-        ctx.fillText(s.q, xPos, yPos + 25);
+        ctx.fillText("=" + s.q, xPos, yPos + 25);
         
         // Остаток (справа)
-        ctx.fillText("ост: " + s.r, xPos + 90, yPos + 25);
+        ctx.fillText("ост. " + s.r, xPos + 90, yPos + 25);
 
-        // Стрелка к следующему шагу (если есть следующий шаг)
+        // Если есть следующий шаг, рисуем стрелку к следующему делимому
         if (i < steps.length - 1) {
+          const nextX = startX + (i + 1) * stepOffsetX;
+          const nextY = startY + (i + 1) * stepOffsetY;
+          
           ctx.beginPath();
-          ctx.moveTo(xPos + stepWidth - 20, yPos + 40);
-          ctx.lineTo(xPos + stepWidth, yPos + 40);
-          ctx.lineTo(xPos + stepWidth, yPos + 60);
+          ctx.moveTo(xPos + 50, yPos + 40);
+          ctx.lineTo(xPos + 50, nextY - 10);
+          ctx.lineTo(nextX - 10, nextY - 10);
           ctx.strokeStyle = "#e0e0e0";
           ctx.stroke();
           
-          // Текст "след."
-          ctx.fillText("след.", xPos + stepWidth - 25, yPos + 55);
+          // Стрелка
+          ctx.beginPath();
+          ctx.moveTo(nextX - 10, nextY - 10);
+          ctx.lineTo(nextX - 15, nextY - 15);
+          ctx.lineTo(nextX - 10, nextY - 10);
+          ctx.lineTo(nextX - 5, nextY - 15);
+          ctx.stroke();
         }
       }
 
-      // Итоговый результат (собираем из остатков снизу вверх)
+      // Собираем итоговый результат из остатков (снизу вверх)
       let result = "";
       for (let i = steps.length - 1; i >= 0; i--) {
         result += steps[i].r.toString(base).toUpperCase();
       }
       
-      // Если результат пустой, используем последний остаток
-      if (result === "" && steps.length > 0) {
-        result = steps[steps.length - 1].r.toString(base).toUpperCase();
-      }
+      // Рисуем итоговый результат справа от последнего шага
+      const lastStepX = startX + (steps.length - 1) * stepOffsetX;
+      const lastStepY = startY + (steps.length - 1) * stepOffsetY;
       
-      // Рисуем итоговый результат под всем решением
-      const finalY = startY + stepHeight + 40;
       ctx.font = "bold 24px monospace";
-      ctx.fillText("Итог: " + result, startX, finalY);
-      
-      // Рисуем стрелки от остатков к итоговому числу
+      ctx.fillText("Итог: " + result, lastStepX + 150, lastStepY);
+
+      // Рисуем стрелки от остатков к соответствующим позициям в результате
       ctx.strokeStyle = "#888";
       ctx.setLineDash([5, 3]);
       
       for (let i = 0; i < steps.length; i++) {
-        const xPos = startX + i * stepWidth + 100;
-        const yPos = startY + 25;
+        const stepIndex = steps.length - 1 - i; // Инвертируем порядок для результата
+        const xPos = startX + i * stepOffsetX + 90;
+        const yPos = startY + i * stepOffsetY + 25;
+        
+        const resultX = lastStepX + 200 + (stepIndex * 20);
+        const resultY = lastStepY;
         
         ctx.beginPath();
         ctx.moveTo(xPos, yPos);
-        ctx.lineTo(xPos + 20, yPos);
-        ctx.lineTo(xPos + 20, finalY - 10);
-        ctx.lineTo(startX + (steps.length - 1 - i) * 30 + 50, finalY - 10);
+        ctx.lineTo(xPos + 30, yPos);
+        ctx.lineTo(xPos + 30, resultY - 20);
+        ctx.lineTo(resultX, resultY - 20);
         ctx.stroke();
+        
+        // Подписываем цифры результата
+        ctx.fillStyle = "#888";
+        ctx.fillText(steps[i].r.toString(base).toUpperCase(), resultX - 5, resultY - 25);
+        ctx.fillStyle = "#e0e0e0";
       }
       ctx.setLineDash([]);
 
       // Автоматически подстраиваем размер canvas под содержимое
-      const requiredWidth = startX + steps.length * stepWidth + 100;
-      const requiredHeight = finalY + 40;
+      const requiredWidth = lastStepX + 300 + steps.length * 20;
+      const requiredHeight = lastStepY + 100;
       
       if (requiredWidth > canvas.width) {
         canvas.width = requiredWidth;
