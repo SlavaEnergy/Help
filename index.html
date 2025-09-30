@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Помощник-Робот</title>
+  <title>Helper</title>
   <style>
     body {
       margin: 0;
@@ -34,7 +34,6 @@
       margin-bottom: 15px;
     }
 
-    /* Кнопка всегда внизу */
     #actionsContainer {
       position: absolute;
       bottom: 20px;
@@ -83,7 +82,6 @@
       background: #444;
     }
 
-    /* Поле-конвертер */
     #converter {
       display: none;
       position: absolute;
@@ -134,13 +132,11 @@
 </head>
 <body>
 
-  <!-- Главный экран -->
   <div id="mainScreen">
     <div id="question">Чем вам помочь?</div>
     <img id="robot" src="robot.png" alt="Робот">
   </div>
 
-  <!-- Кнопка и панель действий -->
   <div id="actionsContainer">
     <div id="actionsPanel">
       <button id="converterBtn">Конвертер систем счисления</button>
@@ -148,7 +144,6 @@
     <button id="actionsBtn">Действия</button>
   </div>
 
-  <!-- Конвертер -->
   <div id="converter">
     <div class="input-row">
       <select id="fromBase">
@@ -188,26 +183,22 @@
 
     let panelOpen = false;
 
-    // Кнопка "Действия"
     actionsBtn.addEventListener('click', () => {
       actionsPanel.style.display = panelOpen ? 'none' : 'flex';
       panelOpen = !panelOpen;
     });
 
-    // Открытие конвертера
     converterBtn.addEventListener('click', () => {
       mainScreen.style.display = 'none';
       actionsPanel.style.display = 'none';
       converter.style.display = 'block';
 
-      // робот внизу справа
       robot.style.position = 'absolute';
       robot.style.width = '80px';
       robot.style.bottom = '20px';
       robot.style.right = '20px';
       document.body.appendChild(robot);
 
-      // клик по роботу = возврат
       robot.onclick = () => {
         converter.style.display = 'none';
         mainScreen.style.display = 'flex';
@@ -219,7 +210,6 @@
       };
     });
 
-    // Перевод числа с анимированным "столбиком"
     convertBtn.addEventListener('click', async () => {
       const numStr = numberInput.value.trim();
       const from = parseInt(fromBase.value);
@@ -245,7 +235,6 @@
       steps.reverse();
       const result = decimal.toString(to).toUpperCase();
 
-      // анимация
       solution.textContent = "";
       for (let i = 0; i < steps.length; i++) {
         const s = steps[i];
@@ -258,3 +247,4 @@
 
 </body>
 </html>
+
